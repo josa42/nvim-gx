@@ -9,8 +9,8 @@ Open URLs and more in the default browser:
 
 - URLs (eg. `https://example.org`)
 - domains with common TLDs (eg. `example.org`)
-- github repos (eg. `josa42/nvim-gx`)  
-  _Requires [`gh`](https://cli.github.com/) to be installed._
+- github repos (eg. `josa42/nvim-gx`)[^1]
+- github issues (eg. `#13377`)[^1]
 
 ## ⌨️ Key Mappings
 
@@ -22,9 +22,10 @@ vim.keymap.set('n', 'gx', require('gx').gx)
 
 ## TODO
 
-- handle github issues (eg. #123)
 - handle git commit hashes
 
 ## License
 
 [MIT © Josa Gesell](LICENSE)
+
+[^1]: Requires [`gh`](https://cli.github.com/) to be installed.

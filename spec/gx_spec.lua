@@ -14,6 +14,10 @@ local repos = {
   'neovim/neovim',
 }
 
+local issues = {
+  '#1',
+}
+
 local domains = {
   'example.com',
   'example.net',
@@ -26,6 +30,8 @@ local not_urls = {
   'foo',
   'foo/bar.com',
   'example.notatld',
+  '#999999999',
+  '1',
 }
 
 describe('gx', function()
@@ -55,6 +61,16 @@ describe('gx', function()
         gx.gx()
 
         assert.spy(gx.open).was.called_with('https://github.com/' .. repo)
+      end)
+    end
+
+    for _, issue in ipairs(issues) do
+      it('should open issue "' .. issue .. '"', function()
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, { issue })
+
+        gx.gx()
+
+        assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/issues/' .. issue:sub(2))
       end)
     end
 
