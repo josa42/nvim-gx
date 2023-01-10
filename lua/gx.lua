@@ -6,6 +6,7 @@ local tlds = { 'com', 'net', 'org', 'de', 'uk', 'io', 'gov', 'edu' }
 local domain_regex = vim.regex(('[^ /]\\+\\.\\(%s\\)$'):format(vim.fn.join(tlds, '\\|')))
 local repo_regex = vim.regex('^[^/]\\+/[^/]\\+$')
 local issue_regex = vim.regex('^#[0-9]\\+$')
+local commit_regex = vim.regex('^[0-9a-fA-F]\\{5,\\}$')
 
 function M.gx()
   local url = M.get_url()
@@ -29,6 +30,13 @@ function M.get_url()
 
     if issue_regex:match_str(word) then
       local url, ok = M.exec('gh', { 'api', '/repos/{owner}/{repo}/issues/' .. word:sub(2), '--jq', '.html_url' })
+      if ok then
+        return vim.fn.trim(url)
+      end
+    end
+
+    if commit_regex:match_str(word) then
+      local url, ok = M.exec('gh', { 'api', '/repos/{owner}/{repo}/commits/' .. word, '--jq', '.html_url' })
       if ok then
         return vim.fn.trim(url)
       end

@@ -11,6 +11,7 @@ Open URLs and more in the default browser:
 - domains with common TLDs (eg. `example.org`)
 - github repos (eg. `josa42/nvim-gx`)[^1]
 - github issues (eg. `#13377`)[^1]
+- github commit (eg. `b13f2e`)[^1]
 
 ## ⌨️ Key Mappings
 
@@ -19,10 +20,6 @@ The plugin maps `gx` in normal mode:
 ```lua
 vim.keymap.set('n', 'gx', require('gx').gx)
 ```
-
-## TODO
-
-- handle git commit hashes
 
 ## License
 

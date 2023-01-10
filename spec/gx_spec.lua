@@ -18,6 +18,10 @@ local issues = {
   '#1',
 }
 
+local commits = {
+  'b13f2e931e6f1dd98ed1e002eb3a967e13bb8ee4',
+}
+
 local domains = {
   'example.com',
   'example.net',
@@ -32,6 +36,8 @@ local not_urls = {
   'example.notatld',
   '#999999999',
   '1',
+  'b13f',
+  '00000',
 }
 
 describe('gx', function()
@@ -71,6 +77,32 @@ describe('gx', function()
         gx.gx()
 
         assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/issues/' .. issue:sub(2))
+      end)
+    end
+
+    for _, commit in ipairs(commits) do
+      it('should open commit "' .. commit .. '"', function()
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit })
+
+        gx.gx()
+
+        assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
+      end)
+
+      it('should open short commit "' .. commit:sub(1, 5) .. '"', function()
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit:sub(1, 5) })
+
+        gx.gx()
+
+        assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
+      end)
+
+      it('should does not open too short commit "' .. commit:sub(1, 4) .. '"', function()
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit:sub(1, 4) })
+
+        gx.gx()
+
+        assert.spy(gx.open).was_not.called_with(match._)
       end)
     end
 
