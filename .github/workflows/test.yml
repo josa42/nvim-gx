@@ -7,10 +7,29 @@ on:
     branches: [ main ]
 
 jobs:
+  test:
+    strategy:
+      matrix:
+        neovim: [ nightly, stable ]
+
+    name: Tests
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: josa42/gha-plenary-busted@main
+      with:
+        neovim-version: "${{ matrix.neovim }}"
+        specs: spec
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: josa42/gha-stylua@main
+

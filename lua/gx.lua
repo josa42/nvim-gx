@@ -61,7 +61,7 @@ function M.exec(cmd, args, timeout)
   handle = vim.loop.spawn(
     cmd,
     { args = args, stdio = { nil, stdout, nil } },
-    vim.schedule_wrap(function(s)
+    vim.schedule_wrap(function()
       stdout:read_stop()
       stdout:close()
       handle:close()
