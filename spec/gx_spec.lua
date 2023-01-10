@@ -14,10 +14,18 @@ local repos = {
   'neovim/neovim',
 }
 
+local domains = {
+  'example.com',
+  'example.net',
+  'example.org',
+  'example.de',
+}
+
 local not_urls = {
   '',
   'foo',
-  'example.org',
+  'foo/bar.com',
+  'example.notatld',
 }
 
 describe('gx', function()
@@ -47,6 +55,16 @@ describe('gx', function()
         gx.gx()
 
         assert.spy(gx.open).was.called_with('https://github.com/' .. repo)
+      end)
+    end
+
+    for _, domain in ipairs(domains) do
+      it('should open domain "' .. domain .. '"', function()
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, { domain })
+
+        gx.gx()
+
+        assert.spy(gx.open).was.called_with('http://' .. domain)
       end)
     end
 
