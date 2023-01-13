@@ -25,4 +25,4 @@ vim.keymap.set('n', 'gx', require('gx').gx)
 
 [MIT © Josa Gesell](LICENSE)
 
-[^1]: Requires [`gh`](https://cli.github.com/) to be installed.
+[^1]: Requires [`gh`](https://cli.github.com/) to be installed and authenticated, run `gh auth` to authenticate.
