@@ -1,3 +1,6 @@
+local notify = require('gx.notify')
+local options = require('gx.options')
+
 local M = {}
 
 -- deliberate incomplete list
@@ -8,10 +11,19 @@ local repo_regex = vim.regex('^[^/]\\+/[^/]\\+$')
 local issue_regex = vim.regex('^#[0-9]\\+$')
 local commit_regex = vim.regex('^[0-9a-fA-F]\\{5,\\}$')
 
+function M.setup(opts)
+  options.set(opts or {})
+end
+
 function M.gx()
   local url = M.get_url()
+
+  notify.resolving_done()
+
   if M.check_if_valid_url(url) then
     M.open(url)
+  else
+    notify.warning(('No url found for "%s"'):format(url))
   end
 end
 
@@ -22,21 +34,24 @@ function M.get_url()
   -- complete github repo; require gh command to be installed
   if vim.fn.executable('gh') == 1 then
     if repo_regex:match_str(word) == 0 then
-      local url, ok = M.exec('gh', { 'api', '/repos/' .. word, '--jq', '.html_url' })
+      notify.resolving('repo', word)
+      local url, ok = M.gh_api('/repos/' .. word, '.html_url')
       if ok then
         return vim.fn.trim(url)
       end
     end
 
     if issue_regex:match_str(word) then
-      local url, ok = M.exec('gh', { 'api', '/repos/{owner}/{repo}/issues/' .. word:sub(2), '--jq', '.html_url' })
+      notify.resolving('issue', word)
+      local url, ok = M.gh_api('/repos/{owner}/{repo}/issues/' .. word:sub(2), '.html_url')
       if ok then
         return vim.fn.trim(url)
       end
     end
 
     if commit_regex:match_str(word) then
-      local url, ok = M.exec('gh', { 'api', '/repos/{owner}/{repo}/commits/' .. word, '--jq', '.html_url' })
+      notify.resolving('commit', word)
+      local url, ok = M.gh_api('/repos/{owner}/{repo}/commits/' .. word, '.html_url')
       if ok then
         return vim.fn.trim(url)
       end
@@ -71,6 +86,17 @@ function M.open(url)
   vim.fn.system(cmd .. ' ' .. vim.fn.shellescape(url))
 end
 
+function M.gh_api(endpoint, filter)
+  local response, ok = M.exec('gh', { 'api', endpoint, '--jq', filter or '.' })
+  if not ok then
+    local msg, valid = M.exec('gh', { 'auth', 'status' })
+    if not valid then
+      notify.error(vim.fn.trim(msg))
+    end
+  end
+  return response, ok
+end
+
 --------------------------------------------------------------------------------
 
 function M.exec(cmd, args, timeout)
@@ -85,17 +111,20 @@ function M.exec(cmd, args, timeout)
   local handle
 
   local stdout = vim.loop.new_pipe()
+  local errout = vim.loop.new_pipe()
 
   handle = vim.loop.spawn(
     cmd,
-    { args = args, stdio = { nil, stdout, nil } },
-    vim.schedule_wrap(function()
+    { args = args, stdio = { nil, stdout, errout } },
+    vim.schedule_wrap(function(s)
       stdout:read_stop()
       stdout:close()
+      errout:read_stop()
+      errout:close()
       handle:close()
 
       results = table.concat(chunks, '')
-      status = 0
+      status = s
 
       done = true
     end)
@@ -107,6 +136,7 @@ function M.exec(cmd, args, timeout)
     end
   end
 
+  vim.loop.read_start(errout, on_read)
   vim.loop.read_start(stdout, on_read)
 
   vim.wait(timeout, function()
