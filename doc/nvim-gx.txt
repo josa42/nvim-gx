@@ -1,0 +1,80 @@
+==============================================================================
+NVIM-GX                                                                *nvim-gx*
+
+nvim-gx is a simple replacement for the gx mapping provided by |netrw-gx|.
+
+
+==============================================================================
+Contents                                                      *nvim-gx.contents*
+
+    Contents..................................................|nvim-gx.contents|
+    Features..................................................|nvim-gx.features|
+    Key Mappings..........................................|nvim-gx.key-mappings|
+    Dependencies..........................................|nvim-gx.dependencies|
+    Setup......................................................|nvim-gx.setup()|
+
+
+==============================================================================
+Features                                                      *nvim-gx.features*
+
+Open URLs and more in the default browser:
+  - URLs (eg. `https://example.org`)
+  - domains with common TLDs (eg. `example.org`)
+  - github repos (eg. `josa42/nvim-gx`)
+  - github issues (eg. `#13377`)
+  - github commit (eg. `b13f2e`)
+
+
+==============================================================================
+Key Mappings                                              *nvim-gx.key-mappings*
+
+The plugin maps `gx` in normal mode:
+
+    >
+    vim.keymap.set('n', 'gx', require('gx').gx)
+<
+
+==============================================================================
+Dependencies                                              *nvim-gx.dependencies*
+
+To resolve repos, issues or commits `gx` needs to be installed and authenticated
+(https://cli.github.com/).
+
+    Verify authentication state:
+    >
+    $ gh auth
+<
+
+    Authenticate with GitHub:
+    >
+    $ gh auth
+<
+
+==============================================================================
+Setup                                                          *nvim-gx.setup()*
+
+    Setup function to set options.
+
+    Usage:
+    >
+    require('gx').setup({
+      show_notifications = true,
+      show_progress = false,
+    })
+<
+
+
+    Valid keys for {opts}
+
+                                                   *nvim-gx.show_notifications*
+    show_notifications: ~
+        Determines if notifications are shown.
+
+                                                        *nvim-gx.show_progress*
+    show_progress: ~
+        Determines if progress notifications are shown.
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
+

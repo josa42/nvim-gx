@@ -21,6 +21,21 @@ The plugin maps `gx` in normal mode:
 vim.keymap.set('n', 'gx', require('gx').gx)
 ```
 
+## Dependencies
+
+To resolve _repos_, _issues_ or _commits_ [`gx`](https://cli.github.com/) needs
+to be installed and authenticated.
+
+Verify authentication state:
+```sh
+gh auth
+```
+
+Authenticate with GitHub:
+```sh
+gh auth
+```
+
 ## License
 
 [MIT © Josa Gesell](LICENSE)
