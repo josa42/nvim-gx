@@ -47,6 +47,7 @@ describe('gx', function()
     package.loaded['gx'] = nil
     gx = require('gx')
     gx.open = spy.new(function() end)
+    vim.notify = spy.new(function() end)
   end)
 
   describe('gx())', function()
@@ -123,6 +124,7 @@ describe('gx', function()
         gx.gx()
 
         assert.spy(gx.open).was_not.called_with(match._)
+        assert.spy(vim.notify).was.called_with(('No url found for "%s"'):format(url), vim.log.levels.WARN)
       end)
     end
   end)
