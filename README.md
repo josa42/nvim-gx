@@ -3,6 +3,8 @@
 `nvim-gx` is a simple replacement for the `gx` mapping provided by
 [netrw](https://github.com/neovim/neovim/blob/ea2658e1f7a0791f7bf5b1da2417ea0c618121fc/runtime/autoload/netrw.vim#L5255).
 
+<br>
+
 ## ✨ Features
 
 Open URLs and more in the default browser:
@@ -13,6 +15,8 @@ Open URLs and more in the default browser:
 - github issues (eg. `#13377`)[^1]
 - github commit (eg. `b13f2e`)[^1]
 
+<br>
+
 ## ⌨️ Key Mappings
 
 The plugin maps `gx` in normal mode:
@@ -21,7 +25,27 @@ The plugin maps `gx` in normal mode:
 vim.keymap.set('n', 'gx', require('gx').gx)
 ```
 
-## Dependencies
+<br>
+
+## 🚛 Installation
+
+Using [vim-plug](https://github.com/junegunn/vim-plug):
+
+```vim
+Plug 'josa42/nvim-gx'
+```
+
+Using packer.nvim
+
+```lua
+use {
+  'josa42/nvim-gx'
+}
+```
+
+<br>
+
+## 📦 Dependencies
 
 To resolve _repos_, _issues_ or _commits_ [`gx`](https://cli.github.com/) needs
 to be installed and authenticated.
@@ -36,8 +60,35 @@ Authenticate with GitHub:
 gh auth
 ```
 
+<br>
+
+## 🔧 Setup
+
+Setup function to set options.
+
+Usage:
+
+```lua
+require('gx').setup({
+  show_notifications = true,
+  show_progress = false,
+})
+```
+
+**Valid keys for `{opts}`**
+
+- `show_notifications`  
+ Determines if notifications are shown.
+
+- `show_progress`:  
+  Determines if progress notifications are shown.
+
+<br>
+
 ## License
 
 [MIT © Josa Gesell](LICENSE)
+
+<br>
 
 [^1]: Requires [`gh`](https://cli.github.com/) to be installed and authenticated, run `gh auth` to authenticate.
