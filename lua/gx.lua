@@ -1,15 +1,20 @@
 local notify = require('gx.notify')
 local options = require('gx.options')
+local ts = require('gx.ts')
 
 local M = {}
 
 -- deliberate incomplete list
 local tlds = { 'com', 'net', 'org', 'de', 'uk', 'io', 'gov', 'edu' }
 
+local npm_filetypes =
+  { 'javascript', 'javascript.jsx', 'javascriptreact', 'typescript', 'typescript.jsx', 'typescriptreact' }
+
 local domain_regex = vim.regex(('[^ /]\\+\\.\\(%s\\)$'):format(vim.fn.join(tlds, '\\|')))
 local repo_regex = vim.regex('^[^/]\\+/[^/]\\+$')
 local issue_regex = vim.regex('^#[0-9]\\+$')
 local commit_regex = vim.regex('^[0-9a-fA-F]\\{5,\\}$')
+local npm_pkg_regex = vim.regex('^\\(@[^/]\\+/[^/]\\+\\|[^@.][^/]*\\)')
 
 function M.setup(opts)
   options.set(opts or {})
@@ -30,6 +35,18 @@ end
 -- get url under cursor
 function M.get_url()
   local word = vim.fn.expand('<cfile>')
+
+  if vim.tbl_contains(npm_filetypes, vim.opt_local.filetype:get()) then
+    local path = ts.get_import_path_at_cursor()
+    if path then
+      local start, len = npm_pkg_regex:match_str(path)
+      if start == 0 then
+        return 'https://www.npmjs.com/package/' .. path:sub(start, len)
+      end
+
+      return word
+    end
+  end
 
   -- complete github repo; require gh command to be installed
   if vim.fn.executable('gh') == 1 then
