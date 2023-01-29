@@ -42,10 +42,14 @@ local not_urls = {
 
 local npm_packages = {
   'express',
+  '@babel/core',
 }
 
 local npm_filetypes = {
   'javascript',
+  'javascriptreact',
+  'typescript',
+  'typescriptreact',
 }
 
 local npm_import_syntax = {
@@ -179,18 +183,22 @@ describe('gx', function()
       end)
     end
 
-    for _, s in ipairs(npm_import_syntax) do
-      describe('with ' .. s.label .. ' syntax', function()
-        for _, pkg in ipairs(npm_packages) do
-          it('should open npm package "' .. pkg .. '"', function()
-            vim.api.nvim_buf_set_option(0, 'filetype', 'javascript')
-            vim.api.nvim_buf_set_lines(0, 0, -1, true, { s.format:format(pkg) })
-            vim.api.nvim_win_set_cursor(0, s.cursor)
+    for _, filetype in ipairs(npm_filetypes) do
+      describe('- with ' .. filetype .. ' filetype', function()
+        for _, s in ipairs(npm_import_syntax) do
+          describe('- with ' .. s.label .. ' syntax', function()
+            for _, pkg in ipairs(npm_packages) do
+              it('should open npm package "' .. pkg .. '"', function()
+                vim.api.nvim_buf_set_option(0, 'filetype', 'javascript')
+                vim.api.nvim_buf_set_lines(0, 0, -1, true, { s.format:format(pkg) })
+                vim.api.nvim_win_set_cursor(0, s.cursor)
 
-            gx.gx()
-            vim.wait(100)
+                gx.gx()
+                vim.wait(100)
 
-            assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
+                assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
+              end)
+            end
           end)
         end
       end)
