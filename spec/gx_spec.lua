@@ -42,22 +42,27 @@ local not_urls = {
 
 describe('gx', function()
   local gx
+  local gx_os
 
   before_each(function()
     package.loaded['gx'] = nil
+    package.loaded['gx.os'] = nil
+
     gx = require('gx')
-    gx.open = spy.new(function() end)
+    gx_os = require('gx.os')
+
+    gx_os.open = spy.new(function() end)
     vim.notify = spy.new(function() end)
   end)
 
-  describe('gx())', function()
+  describe('gx()', function()
     for _, url in ipairs(urls) do
       it('should open url "' .. url .. '"', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { url })
 
         gx.gx()
 
-        assert.spy(gx.open).was.called_with(url)
+        assert.spy(gx_os.open).was.called_with(url)
       end)
     end
 
@@ -72,7 +77,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was.called_with('https://github.com/' .. repo)
+        assert.spy(gx_os.open).was.called_with('https://github.com/' .. repo)
       end)
     end
 
@@ -82,7 +87,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/issues/' .. issue:sub(2))
+        assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/issues/' .. issue:sub(2))
       end)
     end
 
@@ -92,7 +97,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
+        assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
       end)
 
       it('should open short commit "' .. commit:sub(1, 5) .. '"', function()
@@ -100,7 +105,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
+        assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
       end)
 
       it('should does not open too short commit "' .. commit:sub(1, 4) .. '"', function()
@@ -108,7 +113,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was_not.called_with(match._)
+        assert.spy(gx_os.open).was_not.called_with(match._)
       end)
     end
 
@@ -118,7 +123,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was.called_with('http://' .. domain)
+        assert.spy(gx_os.open).was.called_with('http://' .. domain)
       end)
     end
 
@@ -128,7 +133,7 @@ describe('gx', function()
 
         gx.gx()
 
-        assert.spy(gx.open).was_not.called_with(match._)
+        assert.spy(gx_os.open).was_not.called_with(match._)
         assert.spy(vim.notify).was.called_with(('No url found for "%s"'):format(url), vim.log.levels.WARN)
       end)
     end
