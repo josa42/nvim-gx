@@ -94,6 +94,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { url })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was.called_with(url)
       end)
@@ -101,14 +102,15 @@ describe('gx', function()
 
     for _, repo in ipairs(repos) do
       -- temporary skip flaky test in CI
-      if os.getenv('GITHUB_ACTIONS') == 'true' then
-        break
-      end
+      -- if os.getenv('GITHUB_ACTIONS') == 'true' then
+      --   break
+      -- end
 
       it('should open repo "' .. repo .. '"', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { repo })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was.called_with('https://github.com/' .. repo)
       end)
@@ -119,6 +121,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { issue })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/issues/' .. issue:sub(2))
       end)
@@ -129,6 +132,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
       end)
@@ -137,6 +141,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit:sub(1, 5) })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
       end)
@@ -145,6 +150,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit:sub(1, 4) })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was_not.called_with(match._)
       end)
@@ -155,6 +161,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { domain })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was.called_with('http://' .. domain)
       end)
@@ -165,6 +172,7 @@ describe('gx', function()
         vim.api.nvim_buf_set_lines(0, 0, -1, true, { url })
 
         gx.gx()
+        vim.wait(100)
 
         assert.spy(gx_os.open).was_not.called_with(match._)
         assert.spy(vim.notify).was.called_with(('No url found for "%s"'):format(url), vim.log.levels.WARN)
@@ -180,6 +188,7 @@ describe('gx', function()
             vim.api.nvim_win_set_cursor(0, s.cursor)
 
             gx.gx()
+            vim.wait(100)
 
             assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
           end)
