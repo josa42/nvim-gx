@@ -14,7 +14,7 @@ Open URLs and more in the default browser:
 - github repos (eg. `josa42/nvim-gx`)[^1]
 - github issues (eg. `#13377`)[^1]
 - github commit (eg. `b13f2e`)[^1]
-
+- npm packages (eg. `import 'express'`)[^2]
 <br>
 
 ## ⌨️ Key Mappings
@@ -92,3 +92,4 @@ require('gx').setup({
 <br>
 
 [^1]: Requires [`gh`](https://cli.github.com/) to be installed and authenticated, run `gh auth` to authenticate.
+[^2]: Requires [`nvim-treesitter/nvim-treesitter`](https://github.com/nvim-treesitter/nvim-treesitter)

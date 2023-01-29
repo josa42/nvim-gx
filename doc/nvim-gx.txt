@@ -23,6 +23,7 @@ Open URLs and more in the default browser:
   - github repos (eg. `josa42/nvim-gx`)
   - github issues (eg. `#13377`)
   - github commit (eg. `b13f2e`)
+  - npm packages (eg. `import 'express'`)
 
 
 ==============================================================================
