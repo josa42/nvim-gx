@@ -40,11 +40,44 @@ local not_urls = {
   '00000',
 }
 
+local npm_packages = {
+  'express',
+}
+
+local npm_filetypes = {
+  'javascript',
+}
+
+local npm_import_syntax = {
+  {
+    label = 'import-from',
+    format = 'import express from "%s"',
+    cursor = { 1, 21 },
+  },
+  {
+    label = 'import',
+    format = 'import "%s"',
+    cursor = { 1, 8 },
+  },
+  {
+    label = 'dynamic import',
+    format = 'const p = import("%s")',
+    cursor = { 1, 18 },
+  },
+  {
+    label = 'require',
+    format = 'require("%s")',
+    cursor = { 1, 9 },
+  },
+}
+
 describe('gx', function()
   local gx
   local gx_os
 
   before_each(function()
+    vim.cmd.enew()
+
     package.loaded['gx'] = nil
     package.loaded['gx.os'] = nil
 
@@ -135,6 +168,22 @@ describe('gx', function()
 
         assert.spy(gx_os.open).was_not.called_with(match._)
         assert.spy(vim.notify).was.called_with(('No url found for "%s"'):format(url), vim.log.levels.WARN)
+      end)
+    end
+
+    for _, s in ipairs(npm_import_syntax) do
+      describe('with ' .. s.label .. ' syntax', function()
+        for _, pkg in ipairs(npm_packages) do
+          it('should open npm package "' .. pkg .. '"', function()
+            vim.api.nvim_buf_set_option(0, 'filetype', 'javascript')
+            vim.api.nvim_buf_set_lines(0, 0, -1, true, { s.format:format(pkg) })
+            vim.api.nvim_win_set_cursor(0, s.cursor)
+
+            gx.gx()
+
+            assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
+          end)
+        end
       end)
     end
   end)

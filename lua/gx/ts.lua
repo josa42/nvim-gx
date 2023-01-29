@@ -13,6 +13,10 @@ local function get_range_text(node)
 end
 
 local function get_text(node)
+  if not node then
+    return false
+  end
+
   if node:type() == 'string_fragment' then
     return get_range_text(node)
   end
@@ -36,6 +40,10 @@ local function get_parent_by_types(node, types)
 end
 
 local function is_import_path(node)
+  if not node then
+    return false
+  end
+
   if node:type() == 'string' then
     return is_import_path(node:child(1))
   end
