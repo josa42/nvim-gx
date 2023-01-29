@@ -3,34 +3,41 @@ local gx_os = require('gx.os')
 
 local M = {}
 
-local repo_regex = vim.regex('^[^/]\\+/[^/]\\+$')
-local issue_regex = vim.regex('^#[0-9]\\+$')
-local commit_regex = vim.regex('^[0-9a-fA-F]\\{5,\\}$')
+local types = {
+  {
+    name = 'repo',
+    pattern = vim.regex('^[^/]\\+/[^/]\\+$'),
+    endpoint = function(word)
+      return ('/repos/%s'):format(word)
+    end,
+  },
+  {
+    name = 'issue',
+    pattern = vim.regex('^#[0-9]\\+$'),
+    endpoint = function(word)
+      return ('/repos/{owner}/{repo}/issues/%s'):format(word:sub(2))
+    end,
+  },
+  {
+    name = 'commit',
+    pattern = vim.regex('^[0-9a-fA-F]\\{5,\\}$'),
+    endpoint = function(word)
+      return ('/repos/{owner}/{repo}/commits/%s'):format(word)
+    end,
+  },
+}
 
 function M.get_url(word)
   -- complete github repo; require gh command to be installed
   if vim.fn.executable('gh') == 1 then
-    if repo_regex:match_str(word) == 0 then
-      notify.resolving('repo', word)
-      local url, ok = M.gh_api('/repos/' .. word, '.html_url')
-      if ok then
-        return true, vim.fn.trim(url)
-      end
-    end
+    for _, t in ipairs(types) do
+      if t.pattern:match_str(word) == 0 then
+        notify.resolving(t.name, word)
 
-    if issue_regex:match_str(word) then
-      notify.resolving('issue', word)
-      local url, ok = M.gh_api('/repos/{owner}/{repo}/issues/' .. word:sub(2), '.html_url')
-      if ok then
-        return true, vim.fn.trim(url)
-      end
-    end
-
-    if commit_regex:match_str(word) then
-      notify.resolving('commit', word)
-      local url, ok = M.gh_api('/repos/{owner}/{repo}/commits/' .. word, '.html_url')
-      if ok then
-        return true, vim.fn.trim(url)
+        local url, ok = M.gh_api(t.endpoint(word), '.html_url')
+        if ok then
+          return true, vim.fn.trim(url)
+        end
       end
     end
   end
