@@ -36,7 +36,7 @@ end
 function M.get_url()
   local word = vim.fn.expand('<cfile>')
 
-  if vim.tbl_contains(npm_filetypes, vim.opt_local.filetype:get()) then
+  if ts.enabled and vim.tbl_contains(npm_filetypes, vim.opt_local.filetype:get()) then
     local path = ts.get_import_path_at_cursor()
     if path then
       local start, len = npm_pkg_regex:match_str(path)

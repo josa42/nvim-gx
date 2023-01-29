@@ -1,6 +1,8 @@
 local M = {}
 
-local ts_utils = require('nvim-treesitter.ts_utils')
+local exists, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
+
+M.enabled = exists
 
 local function get_range_text(node)
   if node then
