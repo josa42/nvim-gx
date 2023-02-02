@@ -8,6 +8,7 @@ local M = {}
 local resolvers = {
   require('gx.resolver.url'),
   require('gx.resolver.npm'),
+  require('gx.resolver.markdown'),
   require('gx.resolver.github'),
 }
 

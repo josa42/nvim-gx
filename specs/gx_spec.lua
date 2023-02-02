@@ -205,6 +205,71 @@ describe('gx', function()
     end
   end)
 
+  describe('markdown links', function()
+    local line = '[example](%s)'
+    local links = {
+      {
+        url = 'https://example.org?foo=1',
+        columns = { 0, 1, 8, 9, 10 },
+      },
+      {
+        url = 'example.org/index.html?foo=1',
+        url_expected = 'https://example.org/index.html?foo=1',
+        columns = { 0 },
+      },
+    }
+
+    for _, l in ipairs(links) do
+      describe('- with url ' .. l.url, function()
+        for _, column in ipairs(l.columns) do
+          describe('- at column ' .. column, function()
+            it('should open', function()
+              vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
+              vim.api.nvim_buf_set_lines(0, 0, -1, true, { line:format(l.url) })
+              vim.api.nvim_win_set_cursor(0, { 1, column })
+
+              gx.gx()
+              vim.wait(100)
+
+              assert.spy(gx_os.open).was.called_with(l.url_expected or l.url)
+            end)
+          end)
+        end
+      end)
+    end
+
+    local unresolvable_links = {
+      '/path',
+      '#hash',
+      'mailto:foo@example.org',
+      '',
+    }
+
+    for _, link in ipairs(unresolvable_links) do
+      it(('should not open a "%s"'):format(link), function()
+        vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
+        vim.api.nvim_buf_set_lines(0, 0, -1, true, { line:format(link) })
+        vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+        gx.gx()
+        vim.wait(100)
+
+        assert.spy(gx_os.open).was_not.called()
+      end)
+    end
+
+    it('should not open anything on an empty line', function()
+      vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
+      vim.api.nvim_buf_set_lines(0, 0, -1, true, { '' })
+      vim.api.nvim_win_set_cursor(0, { 1, 0 })
+
+      gx.gx()
+      vim.wait(100)
+
+      assert.spy(gx_os.open).was_not.called()
+    end)
+  end)
+
   describe('check_if_valid_url()', function()
     for _, url in ipairs(urls) do
       it(('should identify valid url "%s"'):format(url), function()

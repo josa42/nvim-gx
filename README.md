@@ -15,6 +15,8 @@ Open URLs and more in the default browser:
 - github issues (eg. `#13377`)[^1]
 - github commit (eg. `b13f2e`)[^1]
 - npm packages (eg. `import 'express'`)[^2]
+- github links (eg. `[example](https://example.org)`)[^2]
+
 <br>
 
 ## ⌨️ Key Mappings

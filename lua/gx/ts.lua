@@ -4,7 +4,7 @@ local exists, ts_utils = pcall(require, 'nvim-treesitter.ts_utils')
 
 M.enabled = exists
 
-local function get_range_text(node)
+local function get_text(node)
   if node then
     local r1, c1, r2, c2 = node:range()
     return vim.api.nvim_buf_get_text(0, r1, c1, r2, c2, {})[1]
@@ -12,17 +12,17 @@ local function get_range_text(node)
   return ''
 end
 
-local function get_text(node)
+local function get_string_text(node)
   if not node then
     return false
   end
 
   if node:type() == 'string_fragment' then
-    return get_range_text(node)
+    return get_text(node)
   end
 
   if node:type() == 'string' then
-    return get_text(node:child(1))
+    return get_string_text(node:child(1))
   end
 
   return ''
@@ -37,6 +37,23 @@ local function get_parent_by_types(node, types)
   end
 
   return node
+end
+
+local function get_child_by_type(node, type)
+  for i = 1, node:child_count(), 1 do
+    local c = node:child(i)
+    if c and c:type() == type then
+      return c
+    end
+  end
+end
+local function dump_children(node)
+  for i = 1, node:child_count(), 1 do
+    local c = node:child(i)
+    if c then
+      print(i, c:type(), get_text(c))
+    end
+  end
 end
 
 local function is_import_path(node)
@@ -60,7 +77,7 @@ local function is_import_path(node)
     -- > import('<name>')
     -- > require('<name>')
     local call_node = get_parent_by_types(node, { 'string', 'arguments', 'call_expression' })
-    local call_text = get_range_text(call_node)
+    local call_text = get_text(call_node)
     if call_text:sub(0, 7) == 'require' or call_text:sub(0, 6) == 'import' then
       return true
     end
@@ -72,8 +89,43 @@ end
 function M.get_import_path_at_cursor()
   local node = ts_utils.get_node_at_cursor()
   if is_import_path(node) then
+    return get_string_text(node)
+  end
+end
+
+function M.get_md_link_at_cursor()
+  local node = ts_utils.get_node_at_cursor()
+  if not node then
+    return
+  end
+
+  if node:type() == 'link_destination' then
     return get_text(node)
   end
+
+  if node:type() == 'link_text' then
+    node = node:parent()
+  end
+
+  -- [lext](destination)
+  if node:type() == 'inline_link' then
+    local link = get_child_by_type(node, 'link_destination')
+    if link then
+      return get_text(link)
+    end
+  end
+
+  -- TODO
+  -- [lext][label]
+
+  -- if node:type() == 'full_reference_link' then
+  --   local label = get_child_by_type(node, 'link_label')
+  --   if label then
+  --     print('label', get_text(label))
+  --     -- local root = ts_utils.get_root_for_node(node)
+  --     -- return get_text(link)
+  --   end
+  -- end
 end
 
 return M
