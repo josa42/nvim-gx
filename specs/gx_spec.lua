@@ -210,7 +210,7 @@ describe('gx', function()
     local links = {
       {
         url = 'https://example.org?foo=1',
-        columns = { 0, 1, 8, 9, 10 },
+        columns = { 0, 1, 8, 9, 10, 30, 34, 35 },
       },
       {
         url = 'example.org/index.html?foo=1',

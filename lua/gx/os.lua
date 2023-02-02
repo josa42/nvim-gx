@@ -19,7 +19,7 @@ end
 
 function M.exec(cmd, args, timeout)
   args = args or {}
-  timeout = timeout or 1000
+  timeout = timeout or 2000
 
   local results
   local status = 0
