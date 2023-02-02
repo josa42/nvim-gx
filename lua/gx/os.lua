@@ -17,9 +17,11 @@ function M.open(url)
   vim.fn.system(cmd .. ' ' .. vim.fn.shellescape(url))
 end
 
-function M.exec(cmd, args, timeout)
+function M.exec(cmd, args, opts)
+  opts = opts or {}
   args = args or {}
-  timeout = timeout or 2000
+
+  local timeout = opts.timeout or 2000
 
   local results
   local status = 0
@@ -33,7 +35,7 @@ function M.exec(cmd, args, timeout)
 
   handle = vim.loop.spawn(
     cmd,
-    { args = args, stdio = { nil, stdout, errout } },
+    { args = args, stdio = { nil, stdout, errout }, cwd = opts.cwd },
     vim.schedule_wrap(function(s)
       stdout:read_stop()
       stdout:close()

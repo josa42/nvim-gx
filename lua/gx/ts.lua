@@ -40,19 +40,18 @@ local function get_parent_by_types(node, types)
 end
 
 local function get_child_by_type(node, type)
-  for i = 1, node:child_count(), 1 do
-    local c = node:child(i)
+  for c in node:iter_children() do
     if c and c:type() == type then
       return c
     end
   end
 end
+
 local function dump_children(node)
-  for i = 1, node:child_count(), 1 do
-    local c = node:child(i)
-    if c then
-      print(i, c:type(), get_text(c))
-    end
+  local i = 1
+  for c in node:iter_children() do
+    print(i, c:type(), get_text(c))
+    i = i + 1
   end
 end
 
@@ -126,6 +125,24 @@ function M.get_md_link_at_cursor()
   --     -- return get_text(link)
   --   end
   -- end
+end
+
+function M.get_lua_module_at_cursor()
+  local node = ts_utils.get_node_at_cursor()
+  if not node then
+    return
+  end
+
+  if node:type() == 'link_destination' then
+    return get_text(node)
+  end
+
+  local fn_call = get_parent_by_types(node, { 'arguments', 'function_call' })
+  local fn_name = get_child_by_type(fn_call, 'identifier')
+
+  if get_text(fn_name) == 'require' then
+    return get_text(node)
+  end
 end
 
 return M

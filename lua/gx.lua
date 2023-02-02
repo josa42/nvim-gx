@@ -10,6 +10,7 @@ local resolvers = {
   require('gx.resolver.npm'),
   require('gx.resolver.markdown'),
   require('gx.resolver.github'),
+  require('gx.resolver.lua'),
 }
 
 function M.setup(opts)
