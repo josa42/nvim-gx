@@ -39,18 +39,28 @@ The plugin maps `gx` in normal mode:
 ==============================================================================
 Dependencies                                              *nvim-gx.dependencies*
 
-To resolve repos, issues or commits `gx` needs to be installed and authenticated
+To resolve repos, issues or commits `gh` needs to be installed and authenticated
 (https://cli.github.com/).
 
     Verify authentication state:
     >
-    $ gh auth
+    $ gh auth status
 <
 
     Authenticate with GitHub:
     >
     $ gh auth
 <
+
+To resolve npm packages and markdown links `nvim-treesitter` needs to be
+installed (https://github.com/nvim-treesitter/nvim-treesitter).
+
+    >
+    require('nvim-treesitter.configs').setup({
+      ensure_installed = { 'javascript', 'markdown', 'markdown_inline' },
+    })
+<
+
 
 ==============================================================================
 Setup                                                          *nvim-gx.setup()*

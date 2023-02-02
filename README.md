@@ -49,17 +49,27 @@ use {
 
 ## 📦 Dependencies
 
-To resolve _repos_, _issues_ or _commits_ [`gx`](https://cli.github.com/) needs
+To resolve _repos_, _issues_ or _commits_ [`gh`](https://cli.github.com/) needs
 to be installed and authenticated.
 
-Verify authentication state:
 ```sh
+# verify authentication:
+gh auth status
+
+# authenticate with GitHub:
 gh auth
 ```
 
-Authenticate with GitHub:
-```sh
-gh auth
+<br>
+
+To resolve npm packages and markdown links
+[`nvim-treesitter`]((https://github.com/nvim-treesitter/nvim-treesitter)) needs
+to be installed.
+
+```lua
+require('nvim-treesitter.configs').setup({
+  ensure_installed = { 'javascript', 'markdown', 'markdown_inline' },
+})
 ```
 
 <br>
