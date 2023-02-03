@@ -209,13 +209,21 @@ describe('gx', function()
     local line = '[example](%s)'
     local links = {
       {
+        content = '[example](%s)',
         url = 'https://example.org?foo=1',
         columns = { 0, 1, 8, 9, 10, 30, 34, 35 },
       },
       {
+        content = '[example](%s)',
         url = 'example.org/index.html?foo=1',
         url_expected = 'https://example.org/index.html?foo=1',
         columns = { 0 },
+      },
+      {
+        content = '[example][example_label]\n[example_label]: %s',
+        url = 'example.org/index.html?foo=1',
+        url_expected = 'https://example.org/index.html?foo=1',
+        columns = { 0, 1, 8, 9, 10, 23 },
       },
     }
 
@@ -225,7 +233,7 @@ describe('gx', function()
           describe('- at column ' .. column, function()
             it('should open', function()
               vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
-              vim.api.nvim_buf_set_lines(0, 0, -1, true, { line:format(l.url) })
+              vim.api.nvim_buf_set_lines(0, 0, -1, true, vim.fn.split(l.content:format(l.url), '\n'))
               vim.api.nvim_win_set_cursor(0, { 1, column })
 
               gx.gx()

@@ -102,7 +102,7 @@ function M.get_md_link_at_cursor()
     return get_text(node)
   end
 
-  if node:type() == 'link_text' then
+  if vim.tbl_contains({ 'link_text', 'link_label' }, node:type()) then
     node = node:parent()
   end
 
@@ -114,17 +114,20 @@ function M.get_md_link_at_cursor()
     end
   end
 
-  -- TODO
   -- [lext][label]
+  if node:type() == 'full_reference_link' then
+    local label_node = get_child_by_type(node, 'link_label')
+    if label_node then
+      local label = get_text(label_node)
 
-  -- if node:type() == 'full_reference_link' then
-  --   local label = get_child_by_type(node, 'link_label')
-  --   if label then
-  --     print('label', get_text(label))
-  --     -- local root = ts_utils.get_root_for_node(node)
-  --     -- return get_text(link)
-  --   end
-  -- end
+      for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 1, -1, true)) do
+        local l_label, url = line:match('(%[.*%]) *: *(.*)$')
+        if l_label == label then
+          return vim.fn.trim(url)
+        end
+      end
+    end
+  end
 end
 
 function M.get_lua_module_at_cursor()
