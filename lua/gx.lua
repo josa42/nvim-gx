@@ -1,3 +1,10 @@
+---@brief [[
+--- nvim-gx is a simple replacement for the·gx mapping·provided by netrw-gx.
+---@brief ]]
+---@tag nvim-gx
+---@config { ["name"] = "INTRODUCTION" }
+---@config { ['function_order'] = 'ascending', ['class_order'] = 'descending' }
+
 local notify = require('gx.notify')
 local options = require('gx.options')
 local gx_os = require('gx.os')
@@ -13,10 +20,12 @@ local resolvers = {
   require('gx.resolver.lua'),
 }
 
+--- Setup configuration
 function M.setup(opts)
   options.set(opts or {})
 end
 
+--- Open url at cursor
 function M.gx()
   local url = M.get_url()
 

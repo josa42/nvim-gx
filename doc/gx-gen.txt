@@ -1,0 +1,18 @@
+================================================================================
+UTILS                                                            *nvim-gx.utils*
+
+nvim-gx is a simple replacement for the·gx mapping·provided by netrw-gx.
+Utilities for writing telescope pickers
+
+M.setup()                                              *nvim-gx.utils.setup()*
+    Setup configuration
+
+
+
+M.gx()                                                    *nvim-gx.utils.gx()*
+    Open url at cursor
+
+
+
+
+ vim:tw=78:ts=8:ft=help:norl:
