@@ -116,13 +116,13 @@ local cases = {
       {
         label = 'import-from (express)',
         content = 'import express from "express"',
-        cursors = '                    ^^',
+        cursors = '^      ^       ^    ^^',
         expect = 'https://www.npmjs.com/package/express',
       },
       {
         label = 'import (express)',
         content = 'import "express"',
-        cursors = '       ^^',
+        cursors = '^      ^^',
         expect = 'https://www.npmjs.com/package/express',
       },
       {
@@ -152,13 +152,13 @@ local cases = {
       {
         label = 'import-from (@babel/core)',
         content = 'import babel from "@babel/core"',
-        cursors = '                  ^^',
+        cursors = '       ^     ^    ^^',
         expect = 'https://www.npmjs.com/package/@babel/core',
       },
       {
         label = 'import (@babel/core)',
         content = 'import "@babel/core"',
-        cursors = '       ^^',
+        cursors = '^      ^^',
         expect = 'https://www.npmjs.com/package/@babel/core',
       },
       {

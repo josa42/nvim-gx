@@ -61,7 +61,6 @@ end
 local function dump_children(node)
   local i = 1
   for c in node:iter_children() do
-    print(i, c:type(), get_text(c))
     i = i + 1
   end
 end
@@ -102,6 +101,8 @@ function M.get_import_path_at_cursor()
     return nil
   end
 
+  -- print(node:type(), '<', node:parent():type())
+
   if node:type() == 'arguments' then
     -- const m = import('mod')
     --                 ^
@@ -114,7 +115,7 @@ function M.get_import_path_at_cursor()
     -- const m = require('mod')
     --           ^
     node = get_child_by_types(node:parent(), { 'arguments', 'string' })
-  elseif node:type() == 'identifier' then
+  elseif node:type() == 'identifier' and node:parent():type() == 'variable_declarator' then
     -- const m = require('mod')
     --       ^
     -- const m = import('mod')
@@ -150,6 +151,15 @@ function M.get_import_path_at_cursor()
         node,
         { 'variable_declarator', 'await_expression', 'call_expression', 'arguments', 'string' }
       )
+  elseif node:type() == 'import_statement' then
+    -- import m from 'mod'
+    -- ^
+    node = get_child_by_types(node, { 'string' })
+  elseif node:type() == 'identifier' and node:parent():type() == 'import_clause' then
+    -- import m from 'mod'
+    --        ^
+    node = get_parent_by_types(node, { 'import_clause', 'import_statement' })
+    node = get_child_by_types(node, { 'string' })
   end
 
   if is_import_path(node) then
