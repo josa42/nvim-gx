@@ -1,5 +1,4 @@
 local spy = require('luassert.spy')
-local match = require('luassert.match')
 
 local urls = {
   'https://example.org',
@@ -10,17 +9,7 @@ local urls = {
   'ftp://example.org',
 }
 
-local repos = {
-  'neovim/neovim',
-}
-
-local issues = {
-  '#1',
-}
-
-local commits = {
-  'b13f2e931e6f1dd98ed1e002eb3a967e13bb8ee4',
-}
+local commit = 'b13f2e931e6f1dd98ed1e002eb3a967e13bb8ee4'
 
 local domains = {
   'example.com',
@@ -40,50 +29,216 @@ local not_urls = {
   '00000',
 }
 
-local npm_packages = {
-  'express',
-  '@babel/core',
-}
-
-local npm_filetypes = {
-  'javascript',
-  'javascriptreact',
-  'typescript',
-  'typescriptreact',
-}
-
-local npm_import_syntax = {
+local cases = {
   {
-    label = 'import-from',
-    format = 'import express from "%s"',
-    cursor = '                    ^^',
+    filetypes = { '' },
+    tests = vim.tbl_map(function(url)
+      return {
+        label = ('url "%s"'):format(url),
+        content = url,
+        cursors = '^',
+        expect = url,
+      }
+    end, urls),
   },
   {
-    label = 'import',
-    format = 'import "%s"',
-    cursor = '       ^^',
+    filetypes = { '' },
+    tests = {
+      {
+        label = 'repo "neovim/neovim"',
+        content = 'neovim/neovim',
+        cursors = '^',
+        expect = 'https://github.com/neovim/neovim',
+      },
+    },
   },
   {
-    label = 'dynamic import',
-    format = 'const p = import("%s")',
-    cursor = '^     ^ ^ ^     ^^^',
+    filetypes = { '' },
+    tests = {
+      {
+        label = 'issue "#1"',
+        content = '#1',
+        cursors = '^',
+        expect = 'https://github.com/josa42/nvim-gx/issues/1',
+      },
+    },
   },
   {
-    label = 'dynamic import await',
-    format = 'const p = await import("%s")',
-    cursor = '^     ^ ^ ^     ^     ^^^',
+    filetypes = { '' },
+    tests = {
+      {
+        label = 'commit',
+        content = commit,
+        cursors = '^',
+        expect = ('https://github.com/josa42/nvim-gx/commit/%s'):format(commit),
+      },
+      {
+        label = 'short commit',
+        content = commit:sub(1, 5),
+        cursors = '^',
+        expect = ('https://github.com/josa42/nvim-gx/commit/%s'):format(commit),
+      },
+      {
+        label = 'too short commit',
+        content = commit:sub(1, 4),
+        cursors = '^',
+        expect = nil,
+      },
+    },
   },
   {
-    label = 'require',
-    format = 'require("%s")',
-    cursor = '^      ^^^',
+    filetypes = { '' },
+    tests = vim.tbl_map(function(domain)
+      return {
+        label = ('domain "%s"'):format(domain),
+        content = domain,
+        cursors = '^',
+        expect = ('http://%s'):format(domain),
+      }
+    end, domains),
   },
   {
-    label = 'require assign',
-    format = 'const m = require("%s")',
-    cursor = '^     ^ ^ ^      ^^^',
+    filetypes = { '' },
+    tests = vim.tbl_map(function(url)
+      return {
+        label = ('url "%s"'):format(url),
+        content = url,
+        cursors = '^',
+        expect = nil,
+        expect_warn = ('No url found for "%s"'):format(url),
+      }
+    end, not_urls),
   },
-}
+  {
+    filetypes = { 'javascript' },
+    -- filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+    tests = {
+      {
+        label = 'import-from (express)',
+        content = 'import express from "express"',
+        cursors = '                    ^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'import (express)',
+        content = 'import "express"',
+        cursors = '       ^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'dynamic import (express)',
+        content = 'const p = import("express")',
+        cursors = '^     ^ ^ ^     ^^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'dynamic import await (express)',
+        content = 'const p = await import("express")',
+        cursors = '^     ^ ^ ^     ^     ^^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'require (express)',
+        content = 'require("express")',
+        cursors = '^      ^^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'require assign (express)',
+        content = 'const m = require("express")',
+        cursors = '^     ^ ^ ^      ^^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'import-from (@babel/core)',
+        content = 'import babel from "@babel/core"',
+        cursors = '                  ^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'import (@babel/core)',
+        content = 'import "@babel/core"',
+        cursors = '       ^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'dynamic import (@babel/core)',
+        content = 'const p = import("@babel/core")',
+        cursors = '^     ^ ^ ^     ^^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'dynamic import await (@babel/core)',
+        content = 'const p = await import("@babel/core")',
+        cursors = '^     ^ ^ ^     ^     ^^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'require (@babel/core)',
+        content = 'require("@babel/core")',
+        cursors = '^      ^^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'require assign (@babel/core)',
+        content = 'const m = require("@babel/core")',
+        cursors = '^     ^ ^ ^      ^^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+    },
+  },
+  {
+    filetypes = { 'markdown' },
+    tests = {
+      {
+        label = 'link',
+        content = '[example](https://example.org?foo=1)',
+        cursors = '^^      ^^^                   ^  ^^',
+        expect = 'https://example.org?foo=1',
+      },
+      {
+        label = 'link without protocol',
+        content = '[example](example.org/index.html?foo=1)',
+        cursors = '^',
+        expect = 'https://example.org/index.html?foo=1',
+      },
+      {
+        label = 'link with alias',
+        content = '[example][example_label]\n[example_label]: example.org/index.html?foo=1',
+        cursors = '^^      ^^^            ^      ',
+        expect = 'https://example.org/index.html?foo=1',
+      },
+      {
+        label = 'unresolvable link (/path)',
+        content = '[example](/path)',
+        cursors = '^',
+        expect = nil,
+      },
+      {
+        label = 'unresolvable link (#hash)',
+        content = '[example](#hash)',
+        cursors = '^',
+        expect = nil,
+      },
+      {
+        label = 'unresolvable link (mailto:foo@example.org)',
+        content = '[example](mailto:foo@example.org)',
+        cursors = '^',
+        expect = nil,
+      },
+      {
+        label = 'empty link',
+        content = '[example]()',
+        cursors = '^',
+        expect = nil,
+      },
+      {
+        label = 'empty line',
+        content = '',
+        cursors = '^',
+        expect = nil,
+      },
+    },
   },
 }
 
@@ -92,7 +247,7 @@ local function cursor_list(cur)
   for i = 1, #cur do
     local c = cur:sub(i, i)
     if c == '^' then
-      table.insert(l, { 1, i })
+      table.insert(l, { 1, i - 1 })
     end
   end
   return l
@@ -116,193 +271,40 @@ describe('gx', function()
   end)
 
   describe('gx()', function()
-    for _, url in ipairs(urls) do
-      it('should open url "' .. url .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { url })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was.called_with(url)
-      end)
-    end
-
-    for _, repo in ipairs(repos) do
-      -- temporary skip flaky test in CI
-      -- if os.getenv('GITHUB_ACTIONS') == 'true' then
-      --   break
-      -- end
-
-      it('should open repo "' .. repo .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { repo })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was.called_with('https://github.com/' .. repo)
-      end)
-    end
-
-    for _, issue in ipairs(issues) do
-      it('should open issue "' .. issue .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { issue })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/issues/' .. issue:sub(2))
-      end)
-    end
-
-    for _, commit in ipairs(commits) do
-      it('should open commit "' .. commit .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
-      end)
-
-      it('should open short commit "' .. commit:sub(1, 5) .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit:sub(1, 5) })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was.called_with('https://github.com/josa42/nvim-gx/commit/' .. commit)
-      end)
-
-      it('should does not open too short commit "' .. commit:sub(1, 4) .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { commit:sub(1, 4) })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was_not.called_with(match._)
-      end)
-    end
-
-    for _, domain in ipairs(domains) do
-      it('should open domain "' .. domain .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { domain })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was.called_with('http://' .. domain)
-      end)
-    end
-
-    for _, url in ipairs(not_urls) do
-      it('should NOT open url "' .. url .. '"', function()
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { url })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was_not.called_with(match._)
-        assert.spy(vim.notify).was.called_with(('No url found for "%s"'):format(url), vim.log.levels.WARN)
-      end)
-    end
-
-    for _, filetype in ipairs(npm_filetypes) do
-      describe('- with ' .. filetype .. ' filetype', function()
-        for _, s in ipairs(npm_import_syntax) do
-          describe('- with ' .. s.label .. ' syntax', function()
-            for _, cursor in ipairs(cursor_list(s.cursor)) do
-              describe('- cursor at ' .. vim.inspect(cursor), function()
-                for _, pkg in ipairs(npm_packages) do
-                  it('should open npm package "' .. pkg .. '"', function()
-                    vim.api.nvim_buf_set_option(0, 'filetype', 'javascript')
-                    vim.api.nvim_buf_set_lines(0, 0, -1, true, { s.format:format(pkg) })
+    for _, case in ipairs(cases) do
+      for _, filetype in ipairs(case.filetypes) do
+        describe(filetype ~= '' and 'in a ' .. filetype .. ' buffer' or 'in a buffer', function()
+          for _, s in ipairs(case.tests) do
+            describe('- with ' .. s.label .. ' syntax', function()
+              for _, cursor in ipairs(cursor_list(s.cursors)) do
+                it(
+                  (s.expect ~= nil and 'should open url cursor at ' or 'should NOT open url cursor at ')
+                    .. vim.inspect(cursor[2]),
+                  function()
+                    vim.api.nvim_buf_set_option(0, 'filetype', filetype)
+                    vim.api.nvim_buf_set_lines(0, 0, -1, true, vim.fn.split(s.content, '\n'))
                     vim.api.nvim_win_set_cursor(0, cursor)
 
                     gx.gx()
                     vim.wait(100)
 
-                    assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
-                  end)
-                end
-              end)
-            end
-          end)
-        end
-      end)
-    end
-  end)
+                    if s.expect ~= nil then
+                      assert.spy(gx_os.open).was.called_with(s.expect)
+                    else
+                      assert.spy(gx_os.open).was_not.called()
+                    end
 
-  describe('markdown links', function()
-    local line = '[example](%s)'
-    local links = {
-      {
-        content = '[example](%s)',
-        url = 'https://example.org?foo=1',
-        columns = { 0, 1, 8, 9, 10, 30, 34, 35 },
-      },
-      {
-        content = '[example](%s)',
-        url = 'example.org/index.html?foo=1',
-        url_expected = 'https://example.org/index.html?foo=1',
-        columns = { 0 },
-      },
-      {
-        content = '[example][example_label]\n[example_label]: %s',
-        url = 'example.org/index.html?foo=1',
-        url_expected = 'https://example.org/index.html?foo=1',
-        columns = { 0, 1, 8, 9, 10, 23 },
-      },
-    }
-
-    for _, l in ipairs(links) do
-      describe('- with url ' .. l.url, function()
-        for _, column in ipairs(l.columns) do
-          describe('- at column ' .. column, function()
-            it('should open', function()
-              vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
-              vim.api.nvim_buf_set_lines(0, 0, -1, true, vim.fn.split(l.content:format(l.url), '\n'))
-              vim.api.nvim_win_set_cursor(0, { 1, column })
-
-              gx.gx()
-              vim.wait(100)
-
-              assert.spy(gx_os.open).was.called_with(l.url_expected or l.url)
+                    if s.expect_warn then
+                      assert.spy(vim.notify).was.called_with(s.expect_warn, vim.log.levels.WARN)
+                    end
+                  end
+                )
+              end
             end)
-          end)
-        end
-      end)
+          end
+        end)
+      end
     end
-
-    local unresolvable_links = {
-      '/path',
-      '#hash',
-      'mailto:foo@example.org',
-      '',
-    }
-
-    for _, link in ipairs(unresolvable_links) do
-      it(('should not open a "%s"'):format(link), function()
-        vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
-        vim.api.nvim_buf_set_lines(0, 0, -1, true, { line:format(link) })
-        vim.api.nvim_win_set_cursor(0, { 1, 0 })
-
-        gx.gx()
-        vim.wait(100)
-
-        assert.spy(gx_os.open).was_not.called()
-      end)
-    end
-
-    it('should not open anything on an empty line', function()
-      vim.api.nvim_buf_set_option(0, 'filetype', 'markdown')
-      vim.api.nvim_buf_set_lines(0, 0, -1, true, { '' })
-      vim.api.nvim_win_set_cursor(0, { 1, 0 })
-
-      gx.gx()
-      vim.wait(100)
-
-      assert.spy(gx_os.open).was_not.called()
-    end)
   end)
 
   describe('check_if_valid_url()', function()
