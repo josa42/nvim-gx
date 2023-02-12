@@ -56,24 +56,47 @@ local npm_import_syntax = {
   {
     label = 'import-from',
     format = 'import express from "%s"',
-    cursor = { 1, 21 },
+    cursor = '                    ^^',
   },
   {
     label = 'import',
     format = 'import "%s"',
-    cursor = { 1, 8 },
+    cursor = '       ^^',
   },
   {
     label = 'dynamic import',
     format = 'const p = import("%s")',
-    cursor = { 1, 18 },
+    cursor = '^     ^ ^ ^     ^^^',
+  },
+  {
+    label = 'dynamic import await',
+    format = 'const p = await import("%s")',
+    cursor = '^     ^ ^ ^     ^     ^^^',
   },
   {
     label = 'require',
     format = 'require("%s")',
-    cursor = { 1, 9 },
+    cursor = '^      ^^^',
+  },
+  {
+    label = 'require assign',
+    format = 'const m = require("%s")',
+    cursor = '^     ^ ^ ^      ^^^',
   },
 }
+  },
+}
+
+local function cursor_list(cur)
+  local l = {}
+  for i = 1, #cur do
+    local c = cur:sub(i, i)
+    if c == '^' then
+      table.insert(l, { 1, i })
+    end
+  end
+  return l
+end
 
 describe('gx', function()
   local gx
@@ -187,16 +210,20 @@ describe('gx', function()
       describe('- with ' .. filetype .. ' filetype', function()
         for _, s in ipairs(npm_import_syntax) do
           describe('- with ' .. s.label .. ' syntax', function()
-            for _, pkg in ipairs(npm_packages) do
-              it('should open npm package "' .. pkg .. '"', function()
-                vim.api.nvim_buf_set_option(0, 'filetype', 'javascript')
-                vim.api.nvim_buf_set_lines(0, 0, -1, true, { s.format:format(pkg) })
-                vim.api.nvim_win_set_cursor(0, s.cursor)
+            for _, cursor in ipairs(cursor_list(s.cursor)) do
+              describe('- cursor at ' .. vim.inspect(cursor), function()
+                for _, pkg in ipairs(npm_packages) do
+                  it('should open npm package "' .. pkg .. '"', function()
+                    vim.api.nvim_buf_set_option(0, 'filetype', 'javascript')
+                    vim.api.nvim_buf_set_lines(0, 0, -1, true, { s.format:format(pkg) })
+                    vim.api.nvim_win_set_cursor(0, cursor)
 
-                gx.gx()
-                vim.wait(100)
+                    gx.gx()
+                    vim.wait(100)
 
-                assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
+                    assert.spy(gx_os.open).was.called_with('https://www.npmjs.com/package/' .. pkg)
+                  end)
+                end
               end)
             end
           end)

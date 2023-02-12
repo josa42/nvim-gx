@@ -47,6 +47,17 @@ local function get_child_by_type(node, type)
   end
 end
 
+local function get_child_by_types(node, types)
+  for _, t in ipairs(types) do
+    node = get_child_by_type(node, t)
+    if not node then
+      return nil
+    end
+  end
+
+  return node
+end
+
 local function dump_children(node)
   local i = 1
   for c in node:iter_children() do
@@ -87,6 +98,60 @@ end
 
 function M.get_import_path_at_cursor()
   local node = ts_utils.get_node_at_cursor()
+  if not node then
+    return nil
+  end
+
+  if node:type() == 'arguments' then
+    -- const m = import('mod')
+    --                 ^
+    node = get_child_by_types(node, { 'string' })
+  elseif node:type() == 'import' and get_text(node) == 'import' then
+    -- const m = import('mod')
+    --           ^
+    node = get_child_by_types(node:parent(), { 'arguments', 'string' })
+  elseif node:type() == 'identifier' and get_text(node) == 'require' then
+    -- const m = require('mod')
+    --           ^
+    node = get_child_by_types(node:parent(), { 'arguments', 'string' })
+  elseif node:type() == 'identifier' then
+    -- const m = require('mod')
+    --       ^
+    -- const m = import('mod')
+    --       ^
+    -- const m = await import('mod')
+    --       ^
+    node = get_parent_by_types(node, { 'variable_declarator', 'lexical_declaration' })
+    node = get_child_by_types(node, { 'variable_declarator', 'call_expression', 'arguments', 'string' })
+      or get_child_by_types(
+        node,
+        { 'variable_declarator', 'await_expression', 'call_expression', 'arguments', 'string' }
+      )
+  elseif node:type() == 'variable_declarator' then
+    -- const m = require('mod')
+    --         ^
+    -- const m = import('mod')
+    --         ^
+    node = get_child_by_types(node, { 'call_expression', 'arguments', 'string' })
+      or get_child_by_types(node, { 'await_expression', 'call_expression', 'arguments', 'string' })
+  elseif node:type() == 'await_expression' then
+    -- const m = await import('mod')
+    --           ^
+    node = get_child_by_types(node, { 'call_expression', 'arguments', 'string' })
+  elseif node:type() == 'lexical_declaration' then
+    -- const m = require('mod')
+    -- ^
+    -- const m = import('mod')
+    -- ^
+    -- const m = await import('mod')
+    -- ^
+    node = get_child_by_types(node, { 'variable_declarator', 'call_expression', 'arguments', 'string' })
+      or get_child_by_types(
+        node,
+        { 'variable_declarator', 'await_expression', 'call_expression', 'arguments', 'string' }
+      )
+  end
+
   if is_import_path(node) then
     return get_string_text(node)
   end
@@ -106,7 +171,7 @@ function M.get_md_link_at_cursor()
     node = node:parent()
   end
 
-  -- [lext](destination)
+  -- [text](destination)
   if node:type() == 'inline_link' then
     local link = get_child_by_type(node, 'link_destination')
     if link then
@@ -114,7 +179,7 @@ function M.get_md_link_at_cursor()
     end
   end
 
-  -- [lext][label]
+  -- [text][label]
   if node:type() == 'full_reference_link' then
     local label_node = get_child_by_type(node, 'link_label')
     if label_node then
