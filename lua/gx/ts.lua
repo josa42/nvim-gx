@@ -39,6 +39,17 @@ local function get_parent_by_types(node, types)
   return node
 end
 
+local function find_up_by_type(node, type)
+  while node ~= nil do
+    if node and node:type() == type then
+      return node
+    end
+    node = node:parent()
+  end
+
+  return nil
+end
+
 local function get_child_by_type(node, type)
   for c in node:iter_children() do
     if c and c:type() == type then
@@ -56,13 +67,6 @@ local function get_child_by_types(node, types)
   end
 
   return node
-end
-
-local function dump_children(node)
-  local i = 1
-  for c in node:iter_children() do
-    i = i + 1
-  end
 end
 
 local function is_import_path(node)
@@ -101,65 +105,47 @@ function M.get_import_path_at_cursor()
     return nil
   end
 
-  -- print(node:type(), '<', node:parent():type())
+  -- import m from 'mod'
+  local import_node = find_up_by_type(node, 'import_statement')
+  if import_node ~= nil then
+    node = get_child_by_types(import_node, { 'string' })
+  end
 
-  if node:type() == 'arguments' then
-    -- const m = import('mod')
-    --                 ^
-    node = get_child_by_types(node, { 'string' })
-  elseif node:type() == 'import' and get_text(node) == 'import' then
-    -- const m = import('mod')
-    --           ^
-    node = get_child_by_types(node:parent(), { 'arguments', 'string' })
-  elseif node:type() == 'identifier' and get_text(node) == 'require' then
+  -- import 'mod'
+  local import_call_node = find_up_by_type(node, 'import')
+  if import_call_node ~= nil and get_text(import_call_node) == 'import' then
+    node = get_child_by_types(import_call_node:parent(), { 'arguments', 'string' })
+  end
+
+  -- const m = import('mod')
+  -- const m = await import('mod')
+  local declaration_node = find_up_by_type(node, 'lexical_declaration')
+  if declaration_node ~= nil then
     -- const m = require('mod')
-    --           ^
-    node = get_child_by_types(node:parent(), { 'arguments', 'string' })
-  elseif node:type() == 'identifier' and node:parent():type() == 'variable_declarator' then
-    -- const m = require('mod')
-    --       ^
-    -- const m = import('mod')
-    --       ^
-    -- const m = await import('mod')
-    --       ^
-    node = get_parent_by_types(node, { 'variable_declarator', 'lexical_declaration' })
-    node = get_child_by_types(node, { 'variable_declarator', 'call_expression', 'arguments', 'string' })
+    node = get_child_by_types(declaration_node, { 'variable_declarator', 'call_expression', 'arguments', 'string' })
       or get_child_by_types(
-        node,
+        declaration_node,
         { 'variable_declarator', 'await_expression', 'call_expression', 'arguments', 'string' }
       )
-  elseif node:type() == 'variable_declarator' then
-    -- const m = require('mod')
-    --         ^
-    -- const m = import('mod')
-    --         ^
-    node = get_child_by_types(node, { 'call_expression', 'arguments', 'string' })
-      or get_child_by_types(node, { 'await_expression', 'call_expression', 'arguments', 'string' })
-  elseif node:type() == 'await_expression' then
-    -- const m = await import('mod')
-    --           ^
-    node = get_child_by_types(node, { 'call_expression', 'arguments', 'string' })
-  elseif node:type() == 'lexical_declaration' then
-    -- const m = require('mod')
-    -- ^
-    -- const m = import('mod')
-    -- ^
-    -- const m = await import('mod')
-    -- ^
-    node = get_child_by_types(node, { 'variable_declarator', 'call_expression', 'arguments', 'string' })
-      or get_child_by_types(
-        node,
-        { 'variable_declarator', 'await_expression', 'call_expression', 'arguments', 'string' }
-      )
-  elseif node:type() == 'import_statement' then
-    -- import m from 'mod'
-    -- ^
-    node = get_child_by_types(node, { 'string' })
-  elseif node:type() == 'identifier' and node:parent():type() == 'import_clause' then
-    -- import m from 'mod'
-    --        ^
-    node = get_parent_by_types(node, { 'import_clause', 'import_statement' })
-    node = get_child_by_types(node, { 'string' })
+  end
+
+  -- import('mod')
+  -- await import('mod')
+  -- require('mod')
+  local expression_statement = find_up_by_type(node, 'expression_statement')
+  if expression_statement ~= nil then
+    local call_expression = get_child_by_types(expression_statement, { 'call_expression' })
+      or get_child_by_types(expression_statement, { 'await_expression', 'call_expression' })
+
+    local identifier = get_child_by_types(call_expression, { 'identifier' })
+    if identifier ~= nil and get_text(identifier) == 'require' then
+      node = get_child_by_types(call_expression, { 'arguments', 'string' })
+    end
+
+    local import = get_child_by_types(call_expression, { 'import' })
+    if import ~= nil and get_text(import) == 'import' then
+      node = get_child_by_types(call_expression, { 'arguments', 'string' })
+    end
   end
 
   if is_import_path(node) then

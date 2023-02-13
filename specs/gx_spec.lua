@@ -120,6 +120,12 @@ local cases = {
         expect = 'https://www.npmjs.com/package/express',
       },
       {
+        label = 'import-from named (express)',
+        content = 'import { m } from "express"',
+        cursors = '^      ^ ^   ^    ^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
         label = 'import (express)',
         content = 'import "express"',
         cursors = '^      ^^',
@@ -127,12 +133,24 @@ local cases = {
       },
       {
         label = 'dynamic import (express)',
+        content = 'import("express")',
+        cursors = '^     ^^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'dynamic import await (express)',
+        content = 'await import("express")',
+        cursors = '^     ^     ^^^',
+        expect = 'https://www.npmjs.com/package/express',
+      },
+      {
+        label = 'dynamic import assign (express)',
         content = 'const p = import("express")',
         cursors = '^     ^ ^ ^     ^^^',
         expect = 'https://www.npmjs.com/package/express',
       },
       {
-        label = 'dynamic import await (express)',
+        label = 'dynamic import assign await (express)',
         content = 'const p = await import("express")',
         cursors = '^     ^ ^ ^     ^     ^^^',
         expect = 'https://www.npmjs.com/package/express',
@@ -163,12 +181,24 @@ local cases = {
       },
       {
         label = 'dynamic import (@babel/core)',
+        content = 'import("@babel/core")',
+        cursors = '^     ^^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'dynamic import await (@babel/core)',
+        content = 'await import("@babel/core")',
+        cursors = '^     ^     ^^^',
+        expect = 'https://www.npmjs.com/package/@babel/core',
+      },
+      {
+        label = 'dynamic import assign (@babel/core)',
         content = 'const p = import("@babel/core")',
         cursors = '^     ^ ^ ^     ^^^',
         expect = 'https://www.npmjs.com/package/@babel/core',
       },
       {
-        label = 'dynamic import await (@babel/core)',
+        label = 'dynamic import assign await (@babel/core)',
         content = 'const p = await import("@babel/core")',
         cursors = '^     ^ ^ ^     ^     ^^^',
         expect = 'https://www.npmjs.com/package/@babel/core',
