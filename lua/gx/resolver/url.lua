@@ -1,7 +1,6 @@
-local M = {}
+local tlds = require('gx.tlds')
 
--- deliberate incomplete list
-local tlds = { 'com', 'net', 'org', 'de', 'uk', 'io', 'gov', 'edu' }
+local M = {}
 
 local domain_regex = vim.regex(('[^ /]\\+\\.\\(%s\\)$'):format(vim.fn.join(tlds, '\\|')))
 
