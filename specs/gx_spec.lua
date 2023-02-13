@@ -110,7 +110,7 @@ local cases = {
     end, not_urls),
   },
   {
-    filetypes = { 'javascript' },
+    filetypes = { 'javascript', 'typescript' },
     -- filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
     tests = {
       {
