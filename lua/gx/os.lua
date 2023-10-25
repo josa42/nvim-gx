@@ -2,6 +2,10 @@ local M = {}
 
 -- open url in default browser
 function M.open(url)
+  if vim.ui.open ~= nil then
+    return vim.ui.open(url)
+  end
+
   local cmd
   if vim.fn.has('wsl') == 1 then
     cmd = 'wslview'
