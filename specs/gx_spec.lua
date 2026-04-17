@@ -333,6 +333,16 @@ describe('gx', function()
 
     package.loaded['gx'] = nil
     package.loaded['gx.os'] = nil
+    package.loaded['gx.notify'] = nil
+    package.loaded['gx.options'] = nil
+    package.loaded['gx.ts'] = nil
+    package.loaded['gx.tlds'] = nil
+    package.loaded['gx.resolver.url'] = nil
+    package.loaded['gx.resolver.npm'] = nil
+    package.loaded['gx.resolver.markdown'] = nil
+    package.loaded['gx.resolver.github'] = nil
+    package.loaded['gx.resolver.github_actions'] = nil
+    package.loaded['gx.resolver.lua'] = nil
 
     gx = require('gx')
     gx_os = require('gx.os')
