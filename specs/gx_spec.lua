@@ -270,6 +270,47 @@ local cases = {
       },
     },
   },
+  {
+    filetypes = { 'yaml', 'yml' },
+    tests = {
+      {
+        label = 'workflow file',
+        content = 'uses: brandwatch/frontend-apps/.github/workflows/platform-main.yml@main',
+        cursors = '^',
+        expect = 'https://github.com/brandwatch/frontend-apps/blob/main/.github/workflows/platform-main.yml',
+      },
+      {
+        label = 'action with version tag',
+        content = 'uses: brandwatch/frontend-apps/actions/pr-comment@v1.2.3',
+        cursors = '^',
+        expect = 'https://github.com/brandwatch/frontend-apps/blob/v1.2.3/actions/pr-comment/action.yml',
+      },
+      {
+        label = 'action with custom path',
+        content = 'uses: BrandwatchLtd/slipstream-actions/install-cli@main',
+        cursors = '^',
+        expect = 'https://github.com/BrandwatchLtd/slipstream-actions/blob/main/install-cli/action.yml',
+      },
+      {
+        label = 'simple action without path',
+        content = 'uses: google-github-actions/setup-gcloud@v2',
+        cursors = '^',
+        expect = 'https://github.com/google-github-actions/setup-gcloud/blob/v2/action.yml',
+      },
+      {
+        label = 'quoted action',
+        content = 'uses: "owner/repo/actions/build@release/v1"',
+        cursors = '^',
+        expect = 'https://github.com/owner/repo/blob/release/v1/actions/build/action.yml',
+      },
+      {
+        label = 'local action (should not resolve)',
+        content = 'uses: ./local-action',
+        cursors = '^',
+        expect = nil,
+      },
+    },
+  },
 }
 
 local function cursor_list(cur)
