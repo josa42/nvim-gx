@@ -343,6 +343,9 @@ describe('gx', function()
     package.loaded['gx.resolver.github'] = nil
     package.loaded['gx.resolver.github_actions'] = nil
     package.loaded['gx.resolver.lua'] = nil
+    package.loaded['nvim-treesitter.ts_utils'] = nil
+    package.loaded['nvim-treesitter'] = nil
+    package.loaded['nvim-treesitter.configs'] = nil
 
     gx = require('gx')
     gx_os = require('gx.os')
